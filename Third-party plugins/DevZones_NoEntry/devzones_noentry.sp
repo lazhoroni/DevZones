@@ -36,7 +36,8 @@ public Zone_OnClientEntry(client, String:zone[])
 	{
 		Zone_GetZonePosition(zone, false, zone_pos[client]);
 		g_hClientTimers[client] = CreateTimer(0.1, Timer_Repeat, client, TIMER_REPEAT);
-		PrintHintText(client, "You can't enter here!");
+		PrintHintText(client, "Rush Yasak!");
+		PrintToChat(client, "[\x02smdestek.net\x01] \x04Herhangi bir takımdan son kişi kalana kadar rush yasaktır.");
 	}
 }
 
@@ -55,11 +56,14 @@ public Zone_OnClientLeave(client, String:zone[])
 
 public Action:Timer_Repeat(Handle:timer, any:client)
 {
-	if(!IsClientInGame(client) || !IsPlayerAlive(client))
+	new iTeam1Count = GetTeamClientCountAlive(2);
+	new iTeam2Count = GetTeamClientCountAlive(3);
+	if(!IsClientInGame(client) || !IsPlayerAlive(client) || iTeam1Count == 1 || iTeam2Count == 1)
 	{
 		if (g_hClientTimers[client] != INVALID_HANDLE)
 			KillTimer(g_hClientTimers[client]);
 		g_hClientTimers[client] = INVALID_HANDLE;
+		PrintHintText(client, "Rush Serbest!");
 		return Plugin_Stop;
 	}
 	new Float:clientloc[3];
@@ -83,4 +87,17 @@ KnockbackSetVelocity(client, const Float:startpoint[3], const Float:endpoint[3],
     
 
     TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vector);
+}
+
+stock GetTeamClientCountAlive(team)
+{
+	new iCount = 0;
+	for(new client=1;client<=MaxClients;client++)
+	{
+		if(IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == team)
+		{
+			iCount++;
+		}
+	}
+	return iCount;
 }
